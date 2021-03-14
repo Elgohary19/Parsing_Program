@@ -11,13 +11,14 @@ FILE_TYPES = ["xml", "csv"]
 
 def dict_to_lower(data):
     result = {}
-    for k, v in data.items():
-        if "@" in k:
-            k = k.replace("@", "")
-        if isinstance(v, dict):
-            result[str(k).lower()] = dict_to_lower(v)
-        else:
-            result[str(k).lower()] = v
+    if not isinstance(data, str):
+        for k, v in data.items():
+            if "@" in k:
+                k = k.replace("@", "")
+            if isinstance(v, dict):
+                result[str(k).lower()] = dict_to_lower(v)
+            else:
+                result[str(k).lower()] = v
     return result
 
 
@@ -27,10 +28,17 @@ class Parsing():
         root = tree.getroot()
         data = {"file_name": str(f)}
         data.update(dict_to_lower(xmltodict.parse(ET.tostring(root))))
-        v = []
-        for item in data['transaction']['customer']['units']['vehicle']:
-            v.append(dict_to_lower(item))
-        data['transaction'].update({'vehicles': v})
+        l = []
+        vehicle = data['transaction']['customer']['units']['vehicle']
+        if isinstance(vehicle, dict):
+            l.append(vehicle)
+        else:
+            for item in vehicle:
+                l.append(item)
+
+        print(l)
+        data['transaction'].update({'vehicles': l})
+
         del data['transaction']['customer']['units']
         with open(BASE_DIR + "/parsing_result/" + f.split("/")[-1].replace("xml", "json"), "w",
                   encoding="utf-8") as out_file:
