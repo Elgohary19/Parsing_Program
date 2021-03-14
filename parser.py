@@ -35,8 +35,6 @@ class Parsing():
         else:
             for item in vehicle:
                 l.append(item)
-
-        print(l)
         data['transaction'].update({'vehicles': l})
 
         del data['transaction']['customer']['units']
